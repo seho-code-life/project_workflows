@@ -1,0 +1,49 @@
+# 自动编译&发布qq小程序版本
+# 参考1. https://segmentfault.com/a/1190000039125224
+# 由 https://github.com/seho-code-life/project_workflows 提供支持
+name: MP-QQ CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-qq-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Node ENV
+        uses: actions/setup-node@master
+        with:
+          node-version: 12.13.0
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: PreBuild
+        run: npm run build:mp-qq
+
+      - name: Version
+        id: version
+        uses: ashley-taylor/read-json-property-action@v1.0
+        with:
+          path: ./package.json
+          property: version
+          
+      # 这里的env配置需要阅读官方文档，要根据自己项目更改
+      - name: Build
+        uses: docker://qqminiapp/build:latest
+        env:
+          PLUGIN_VERSION: ${{steps.version.outputs.value}}
+          PLUGIN_DESC: CI自动构建上传
+          PLUGIN_APPTOKEN: ${{ secrets.QQ_UPLOAD_TOKEN }}
+          PLUGIN_BUILDUSER: ${{ github.actor }}
+          PLUGIN_EXPERIENCE: true
+          PLUGIN_SOURCECODEPATH: ./dist/build/mp-qq

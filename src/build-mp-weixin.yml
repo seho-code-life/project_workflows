@@ -1,0 +1,47 @@
+# 自动编译&发布微信小程序版本
+# 参考1. https://segmentfault.com/a/1190000039125224
+# 由 https://github.com/seho-code-life/project_workflows 提供支持
+
+name: MP-WEIXIN CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-weixin-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Node ENV
+        uses: actions/setup-node@master
+        with:
+          node-version: 12.13.0
+
+      - name: Install Dependencies
+        run: npm i
+
+      - name: Build
+        run: npm run build:mp-weixin
+
+      # see Project/Settings/Secrets
+      - name: Generate private key for upload
+        run: echo "$UPLOAD_PRIVATE_KEY" > private.key
+        env:
+          UPLOAD_PRIVATE_KEY: ${{ secrets.WEIXIN_UPLOAD_PRIVATE_KEY }}
+
+      # 以下设置，请根据自己项目需要进行调整
+      # 需要根目录有package.json
+      - name: Set PackageJson
+        run: cp ./package.json ./dist/build/mp-weixin/package.json
+
+      # 上传代码，需要设置private.key具体位置
+      - name: Upload to WeChat
+        run: npx mp-ci upload ./dist/build/mp-weixin --pkp=./private.key

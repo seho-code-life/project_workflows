@@ -1,0 +1,29 @@
+# 自动发布版本，上传oss
+# 由 https://github.com/seho-code-life/project_workflows 提供支持
+name: release-oss
+on:
+  push:
+    branches:
+      - main
+jobs:
+  main:
+    name: main
+    runs-on: ubuntu-latest
+    steps:
+      - name: 切换仓库
+        uses: actions/checkout@master
+      - name: 准备Node环境
+        uses: actions/setup-node@master
+        with:
+          node-version: 12.13.0
+      - name: 安装依赖以及编译
+        run: npm i && CI= npm run build
+      - name: 上传到OSS
+        uses: fangbinwei/aliyun-oss-website-action@v1
+        with:
+          # 需要设置bucket
+          accessKeyId: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          accessKeySecret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+          bucket: ""
+          endpoint: "oss-cn-beijing.aliyuncs.com"
+          folder: "build"

@@ -1,0 +1,36 @@
+# 同步github仓库信息到gitee
+# 由 https://github.com/seho-code-life/project_workflows 提供支持
+name: sync2gitee
+
+on:
+  schedule:
+    # 设置触发时间，cron表达式
+    - cron: "30 17 * * *"
+
+jobs:
+  run:
+    name: Sync GitHub to Gitee
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get current repository name
+        id: info
+        uses: actions/github-script@v3.1
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          result-encoding: string
+          script: |
+            return context.repo.repo;
+      - name: Mirror the GitHub repos to Gitee
+        # 需要去这个action查询具体配置
+        uses: Yikun/hub-mirror-action@master
+        with:
+          # github仓库地址
+          src: github/swordCodePractice
+          # gitee仓库地址
+          dst: gitee/sword-code-practice
+          # 需要设置key等变量，具体配置可以在Yikun/hub-mirror-action这个action中浏览文档
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          static_list: "${{ steps.info.outputs.result }}"
+          account_type: org
+          force_update: true

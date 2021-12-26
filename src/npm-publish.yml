@@ -1,0 +1,37 @@
+# 为库提供npm发布支持且自动编译以及同步CNPM仓库
+# 注意事项: cnpm-sync这个任务需要你更改
+# 由 https://github.com/seho-code-life/project_workflows 提供支持
+
+name: npm-publish
+on:
+  push:
+    branches:
+      - master # Change this to your default branch
+jobs:
+  npm-publish:
+    name: npm-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+      - name: setup-node
+        uses: actions/setup-node@master
+        with:
+          node-version: 12.13.0
+      - name: install-build
+        run: npm i && npm run build
+      - name: publish-npm
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_AUTH_TOKEN }}
+  cnpm-sync:
+    name: cnpm-sync
+    needs: npm-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: sync-cnpm
+        with:
+          # 需要把‘express’换成你的包名，谨记
+          url: "https://npmmirror.com/sync/express"
+          timeout: 50000
+          method: GET
