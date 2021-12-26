@@ -1,0 +1,7 @@
+{
+  "build-mp-qq.yml": "自动编译&发布qq小程序版本",
+  "build-mp-weixin.yml": "自动编译&发布微信小程序版本",
+  "npm-publish.yml": "为库提供npm发布支持且自动编译以及同步CNPM仓库",
+  "release-oss.yaml": "自动发布版本，上传oss",
+  "sync2gitee.yml": "同步github仓库信息到gitee"
+}
